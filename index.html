@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<link href="base.css" rel="stylesheet" />
+<link href='https://api.tiles.mapbox.com/mapbox.js/v1.6.3/mapbox.css' rel='stylesheet' />
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css"
+  integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
+  crossorigin=""/>
+<link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.52.0/mapbox-gl.css' rel='stylesheet' />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+  <div id='map'>
+  </div>
+  <div id='selections' class="selections">
+    <a href='#' class="show">Choose what MRT line to display</a>
+    <div class='content'>
+      <a href='#' class="hide">Hide</a>
+      <div id="toggles">
+      </div>
+    </div>
+  </div>
+  <div id='loading'>
+  </div>
+  <div id='selected'>
+    <h1>Explore MRT stations in Singapore</h1>
+  </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.4.8/d3.min.js"></script>
+  <script src="https://api.tiles.mapbox.com/mapbox.js/v2.2.1/mapbox.js"></script>
+  <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.52.0/mapbox-gl.js'></script>
+  <script src="voronoi_map.js"></script>
+  <script src="data.js"></script>
+
+  <script>
+    L.mapbox.accessToken = 'pk.eyJ1IjoiemV0dGVyIiwiYSI6ImVvQ3FGVlEifQ.jGp_PWb6xineYqezpSd7wA';
+    var map = L.mapbox.map('map', 'zetter.i73ka9hn')
+     .fitBounds([[1.5, 103.66], [1.25 , 103.97]]);
+
+    map.doubleClickZoom.disable();
+
+    url = 'mrt.csv';
+
+    // generate Voronoi map and control layers
+    voronoiMap(map, url);
+
+    // find nearest MRT stations
+    myMarker = null;
+    polyline =  null;
+
+    // calcuate distance given two geo-coordinates
+    var calDistance = function(lat1, lon1, lat2, lon2, unit) {
+    	if ((lat1 == lat2) && (lon1 == lon2)) {
+    		return 0;
+    	}
+    	else {
+    		var radlat1 = Math.PI * lat1/180;
+    		var radlat2 = Math.PI * lat2/180;
+    		var theta = lon1-lon2;
+    		var radtheta = Math.PI * theta/180;
+    		var dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
+    		if (dist > 1) {
+    			dist = 1;
+    		}
+    		dist = Math.acos(dist);
+    		dist = dist * 180/Math.PI;
+    		dist = dist * 60 * 1.1515;
+    		if (unit=="K") { dist = dist * 1.609344 }
+    		if (unit=="N") { dist = dist * 0.8684 }
+    		return dist.toFixed(2);
+    	}
+    }
+
+    var findNearestMrt = function(lat, long){
+      minV = 9999;
+      for (i=0; i<data.length; i++){
+        point = data[i]
+        lat_temp = point.latitude
+        long_temp = point.longitude
+        name = point.name
+        temp = (lat-lat_temp)**2 + (long-long_temp)**2
+        if(temp<minV){
+          minV = temp;
+          minN = name;
+          r = [lat_temp, long_temp];
+        }
+      }
+      distV = calDistance(lat, long, r[0], r[1], 'K');
+      return [r[0],r[1],minN, distV];
+    };
+
+    map.on('dblclick', function(e) {
+      var lat = e.latlng.lat,
+          long = e.latlng.lng;
+
+      nearestMrt = findNearestMrt(lat, long);
+
+      if(myMarker != null){
+       myMarker._removeIcon();
+       polyline.setStyle({'opacity':'0'});
+      }
+
+      myMarker =
+       L.marker([e.latlng.lat, e.latlng.lng], {
+         icon: L.mapbox.marker.icon({
+           'marker-size': 'small',
+           'marker-symbol': 'circle',
+           'marker-color': '#fa0'
+         }),
+         draggable: true
+       }).addTo(map);
+
+      // create a red polyline from an arrays of LatLng points
+      polyline =
+        L.polyline([[lat,long], [nearestMrt[0],nearestMrt[1]]], {
+        color: 'red',
+        'opacity':1
+      }).addTo(map);
+
+      d3.select('#selected h1')
+        .html('')
+        .text(nearestMrt[2] + ' is ' + nearestMrt[3] + ' km away')
+    });
+
+  </script>
+</body>
+</html>
