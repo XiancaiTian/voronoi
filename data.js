@@ -1,4 +1,4 @@
-data = [
+points = [
   {
     "id": 201,
     "latitude": 1.34261,

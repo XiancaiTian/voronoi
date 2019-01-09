@@ -12,10 +12,13 @@ showHide = function(selector) {
   });
 }
 
-voronoiMap = function(map, url, initialSelections) {
+voronoiMap = function(map, initialSelections) {
   var pointTypes = d3.map(),
-      points = [],
       lastSelectedPoint;
+
+  points.forEach(function(point) {
+    pointTypes.set(point.type, {type: point.type, color: point.color});
+  })
 
   var voronoi = d3.geom.voronoi()
       .x(function(d) { return d.x; })
@@ -46,9 +49,7 @@ voronoiMap = function(map, url, initialSelections) {
 
     labels.append("input")
       .attr('type', 'checkbox')
-      .property('checked', function(d) {
-        return initialSelections === undefined || initialSelections.has(d.type)
-      })
+      .property('checked', function(d) { return true; })
       .attr("value", function(d) { return d.type; })
       .on("change", drawWithLoading);
 
@@ -70,6 +71,7 @@ voronoiMap = function(map, url, initialSelections) {
 
   var pointsFilteredToSelectedTypes = function() {
     var currentSelectedTypes = d3.set(selectedTypes());
+
     return points.filter(function(item){
       return currentSelectedTypes.has(item.type);
     });
@@ -87,6 +89,7 @@ voronoiMap = function(map, url, initialSelections) {
   }
 
   var draw = function() {
+    // console.log('log2');
     d3.select('#overlay').remove();
 
     var bounds = map.getBounds(),
@@ -153,16 +156,6 @@ voronoiMap = function(map, url, initialSelections) {
     }
   };
 
-  map.on('ready', function() {
-    d3.csv(url, function(csv) {
-      points = csv;
-      points.forEach(function(point) {
-        pointTypes.set(point.type, {type: point.type, color: point.color});
-      })
-      drawPointTypeSelection();
-      map.addLayer(mapLayer);
-    })
-  });
-
-
+  drawPointTypeSelection();
+  map.addLayer(mapLayer);
 }

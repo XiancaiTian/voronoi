@@ -14,7 +14,13 @@
   <div id='map'>
   </div>
   <div id='selections' class="selections">
-    <a href='#' class="show">Choose what MRT line to display</a>
+    <div id='createNewStation'>
+      <input type="checkbox" id='createNewStationInput' value='createNewStation' onclick="clickNewStation()">
+      <span>Create Station</span>
+    </div>
+    <div>
+      <a href='#' class="show">Choose what MRT line to display</a>
+    </div>
     <div class='content'>
       <a href='#' class="hide">Hide</a>
       <div id="toggles">
@@ -37,18 +43,41 @@
   <script>
     L.mapbox.accessToken = 'pk.eyJ1IjoiemV0dGVyIiwiYSI6ImVvQ3FGVlEifQ.jGp_PWb6xineYqezpSd7wA';
     var map = L.mapbox.map('map', 'zetter.i73ka9hn')
-     .fitBounds([[1.49, 103.66], [1.246 , 103.97]]);
+     .fitBounds([[1.49, 103.66], [1.248 , 103.97]]);
 
     map.doubleClickZoom.disable();
 
     url = 'mrt.csv';
 
-    // generate Voronoi map and control layers
-    voronoiMap(map, url);
+    createNewStation = false;
+
+    voronoiMap(map);
 
     // find nearest MRT stations
     myMarker = null;
     polyline =  null;
+    newStationCnt = null;
+
+    var clickNewStation = function(){
+      createNewStation = !createNewStation;
+      if(createNewStation){
+        newStationCnt = 0;
+        if(myMarker != null){
+          map.removeLayer(myMarker);
+          map.removeLayer(polyline);
+        }
+      }
+      else {
+        if(newStationCnt > 0){
+          for(i=1; i<=newStationCnt; i++){
+            points.pop();
+          }
+          var allLabels = d3.select('#toggles').selectAll('input')[0];
+          d3.select('#toggles').selectAll('label')[0][allLabels.length-1].remove();
+          voronoiMap(map);
+        }
+      }
+    }
 
     // calcuate distance given two geo-coordinates
     var calDistance = function(lat1, lon1, lat2, lon2, unit) {
@@ -75,8 +104,8 @@
 
     var findNearestMrt = function(lat, long){
       minV = 9999;
-      for (i=0; i<data.length; i++){
-        point = data[i]
+      for (i=0; i<points.length; i++){
+        point = points[i]
         lat_temp = point.latitude
         long_temp = point.longitude
         name = point.name
@@ -92,37 +121,44 @@
     };
 
     map.on('dblclick', function(e) {
+
       var lat = e.latlng.lat,
           long = e.latlng.lng;
 
-      nearestMrt = findNearestMrt(lat, long);
-
-      if(myMarker != null){
-       myMarker._removeIcon();
-       polyline.setStyle({'opacity':'0'});
+      if(createNewStation){
+        var newStation = {'color':'636363', 'latitude':lat, 'longitude':long, 'type':'custom','name':'New Station'};
+        points.push(newStation);
+        newStationCnt = newStationCnt + 1;
+        voronoiMap(map);
       }
+      else{
+        nearestMrt = findNearestMrt(lat, long);
+        if(myMarker != null){
+          map.removeLayer(myMarker);
+          map.removeLayer(polyline);
+        }
+        myMarker =
+         L.marker([e.latlng.lat, e.latlng.lng], {
+           icon: L.mapbox.marker.icon({
+             'marker-size': 'small',
+             'marker-symbol': 'circle',
+             'marker-color': '#fa0'
+           }),
+           draggable: true
+         }).addTo(map);
 
-      myMarker =
-       L.marker([e.latlng.lat, e.latlng.lng], {
-         icon: L.mapbox.marker.icon({
-           'marker-size': 'small',
-           'marker-symbol': 'circle',
-           'marker-color': '#fa0'
-         }),
-         draggable: true
-       }).addTo(map);
+        // create a red polyline from an arrays of LatLng points
+        polyline =
+          L.polyline([[lat,long], [nearestMrt[0],nearestMrt[1]]], {
+          color: 'red',
+          'opacity':1
+        }).addTo(map);
 
-      // create a red polyline from an arrays of LatLng points
-      polyline =
-        L.polyline([[lat,long], [nearestMrt[0],nearestMrt[1]]], {
-        color: 'red',
-        'opacity':1
-      }).addTo(map);
-
-      d3.select('#selected h1')
-        .html('')
-        .text(nearestMrt[2] + ' is ' + nearestMrt[3] + ' km away')
-    });
+        d3.select('#selected h1')
+          .html('')
+          .text(nearestMrt[2] + ' is ' + nearestMrt[3] + ' km away');
+      }}
+    )
 
   </script>
 </body>

@@ -107,6 +107,12 @@ p {
   height: 28px;
 }
 
+#createNewStation {
+  bottom: 10px;
+  left: 10px;
+  height: 28px;
+}
+
 #selected h1 {
   color:blue;
   font-size: 20px;
