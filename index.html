@@ -51,7 +51,8 @@
     url = 'mrt.csv';
 
     var createNewStation = false,
-        points = data;
+        points = data,
+        boundary_polygon = [];
 
     voronoiMap(map);
 
@@ -123,7 +124,12 @@
     };
 
     map.on('dblclick', function(e) {
-      //console.log(e.layerPoint);
+      // boundary_polygon.push([e.layerPoint.x, e.layerPoint.y])
+      // a_str = ''
+      // for(k=0;k<boundary_polygon.length;k++){
+      //   a_str += '['+boundary_polygon[k].toString()+'],';
+      // }
+      // console.log(a_str);
       var lat = e.latlng.lat,
           long = e.latlng.lng;
 
