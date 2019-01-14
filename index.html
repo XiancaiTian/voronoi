@@ -31,6 +31,7 @@
   </div>
   <div id='selected'>
     <h1>Explore MRT stations in Singapore</h1>
+    <h2></h2>
   </div>
   </div>
 
@@ -49,7 +50,8 @@
 
     url = 'mrt.csv';
 
-    createNewStation = false;
+    var createNewStation = false,
+        points = data;
 
     voronoiMap(map);
 
@@ -121,7 +123,7 @@
     };
 
     map.on('dblclick', function(e) {
-
+      //console.log(e.layerPoint);
       var lat = e.latlng.lat,
           long = e.latlng.lng;
 

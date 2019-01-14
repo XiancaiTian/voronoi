@@ -16,6 +16,12 @@ p {
   stroke-opacity: .2;
 }
 
+.max-d-cell{
+  fill:'#f70202';
+  stroke:#f70202;
+  stroke-width: 3px;
+}
+
 .point-cell:hover, .point-cell.selected {
   fill: none;
   stroke: #000;
@@ -104,7 +110,7 @@ p {
 #selected {
   bottom: 10px;
   left: 10px;
-  height: 28px;
+  height: 40px;
 }
 
 #createNewStation {
@@ -117,7 +123,18 @@ p {
   color:blue;
   font-size: 20px;
   margin: 0px;
-  line-height: 20px;
+
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#selected h2 {
+  color:blue;
+  font-size: 12px;
+  margin: 0px;
+
   font-weight: bold;
   white-space: nowrap;
   overflow: hidden;
