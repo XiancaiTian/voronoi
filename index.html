@@ -59,6 +59,7 @@
     // find nearest MRT stations
     myMarker = null;
     polyline =  null;
+    polyline2 = null;
     newStationCnt = null;
 
     var clickNewStation = function(){
@@ -132,6 +133,13 @@
       // console.log(a_str);
       var lat = e.latlng.lat,
           long = e.latlng.lng;
+
+      // boundary_polygon.push([lat, long])
+      // a_str = ''
+      // for(k=0;k<boundary_polygon.length;k++){
+      //   a_str += '['+boundary_polygon[k].toString()+'],';
+      // }
+      // console.log(a_str);
 
       if(createNewStation){
         var newStation = {'color':'636363', 'latitude':lat, 'longitude':long, 'type':'custom','name':'New Station'};
