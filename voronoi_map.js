@@ -223,7 +223,7 @@ voronoiMap = function(map, initialSelections) {
       // refresh the text content
       d3.select('#selected h2')
         .html('')
-        .text('maximum nearest-MRT distance: ' + r_k + 'km');
+        .text('maximum closest-MRT-distance: ' + r_k + 'km');
 
       // highlight the cell
       d3.selectAll('path.point-cell')
