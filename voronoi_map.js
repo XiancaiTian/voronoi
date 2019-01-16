@@ -216,23 +216,23 @@ voronoiMap = function(map, initialSelections) {
 
       polyline2 =
         L.polyline([[polygon_lat, polygon_lng], [center_lat,center_lng]], {
-        color: 'blue',
-        'opacity':0.5
+        color: 'red',
+        'opacity':0.8
       }).addTo(map);
 
       // refresh the text content
       d3.select('#selected h2')
         .html('')
-        .text('maximum nearest-MRT distance: ' + r_k + 'km');
+        .text('maximum closest-MRT-distance: ' + r_k + 'km');
 
       // highlight the cell
-      d3.selectAll('path.point-cell')
-      .data(filteredPoints)
-      .each(function(d,i){
-        if(d.latitude==center_lat && d.longitude==center_lng ){
-          d3.select(this).style({'fill':'red','opacity':0.5});
-        }
-      });
+      // d3.selectAll('path.point-cell')
+      // .data(filteredPoints)
+      // .each(function(d,i){
+      //   if(d.latitude==center_lat && d.longitude==center_lng ){
+      //     d3.select(this).style({'fill':'red','opacity':0.5});
+      //   }
+      // });
     }
 
     var svg = d3.select(map.getPanes().overlayPane).append("svg")
